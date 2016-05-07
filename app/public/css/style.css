@@ -17,6 +17,11 @@ footer {
 footer p {
     text-align: center;
 }
+/* Table */
+table th, table tr {
+    width: 70px;
+    text-align: center;
+}
 
 /* Modal Header */
 .modal-header {
