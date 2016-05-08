@@ -10,7 +10,9 @@ body {
 #app {
     height: 100%;
 }
-
+a {
+    color: white;
+}
 footer {
     color: white;
 }

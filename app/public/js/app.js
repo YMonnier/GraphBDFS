@@ -3,7 +3,6 @@
  *
  */
 
-
 var graph = (function () {
     return {
         app: angular.module('GraphBDFS', []),
@@ -16,9 +15,6 @@ var graph = (function () {
 graph.modules.datastruct = (function () {
     return {
         init: function (nodes, links) {
-            //graph.nodes = nodes;
-            //graph.links = links;
-
             nodes.forEach(function (node) {
                 links.forEach(function (link) {
                     if (link.source === node) {
@@ -29,14 +25,198 @@ graph.modules.datastruct = (function () {
                             node.neighbours.push(link.source)
                     }
                 })
-            })
+            });
             console.log(nodes);
+            graph.nodes = nodes;
+            graph.links = links;
+            $('#modal-config').css('display', 'none');
+            graph.modules.engin.init();
         }
     }
 })();
+
+graph.modules.engin = (function () {
+    var w, h, circleWidth, engin, force, link, node;
+    var palette = {
+        "white": "#FFFFFF",
+        "lightgray": "#819090",
+        "gray": "#708284",
+        "mediumgray": "#536870",
+        "darkgray": "#475B62",
+        "darkblue": "#0A2933",
+        "darkerblue": "#042029",
+        "paleryellow": "#FCF4DC",
+        "paleyellow": "#EAE3CB",
+        "yellow": "#A57706",
+        "orange": "#BD3613",
+        "red": "#D11C24",
+        "pink": "#C61C6F",
+        "purple": "#595AB7",
+        "blue": "#2176C7",
+        "green": "#259286",
+        "yellowgreen": "#738A05"
+    };
+    return {
+        init: function () {
+            w = window.innerWidth
+                || document.documentElement.clientWidth
+                || document.body.clientWidth;
+
+            h = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+
+            circleWidth = 7;
+
+            engin = d3.select("#app")
+                .append("svg:svg")
+                .attr("class", "stage")
+                .attr("width", w)
+                .attr("height", h);
+
+            force = d3.layout.force()
+                .nodes(graph.nodes)
+                .links([])
+                .gravity(0.1)
+                .charge(-1000)
+                .size([w, h]);
+
+            link = engin.selectAll(".link")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke", palette.gray)
+                .attr("fill", "none");
+
+            node = engin.selectAll("circle.node")
+                .data(graph.nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .on("mouseover", function (d, i) {    //MOUSEOVER
+                    if (!d.root) {
+                        //CIRCLE
+                        d3.select(this).selectAll("circle")
+                            .transition()
+                            .duration(250)
+                            .style("cursor", "none")
+                            .attr("r", circleWidth + 3)
+                            .attr("fill", palette.orange);
+
+                        //TEXT
+                        d3.select(this).select("text")
+                            .transition()
+                            .style("cursor", "none")
+                            .duration(250)
+                            .style("cursor", "none")
+                            .attr("font-size", "1.5em")
+                            .attr("x", 15)
+                            .attr("y", 5)
+                    } else {
+                        //CIRCLE
+                        d3.select(this).selectAll("circle")
+                            .style("cursor", "none");
+
+                        //TEXT
+                        d3.select(this).select("text")
+                            .style("cursor", "none");
+                    }
+                })
+                .on("mouseout", function (d, i) { //MOUSEOUT
+                    if (!d.root) {
+                        //CIRCLE
+                        d3.select(this).selectAll("circle")
+                            .transition()
+                            .duration(250)
+                            .attr("r", circleWidth)
+                            .attr("fill", palette.blue);
+
+                        //TEXT
+                        d3.select(this).select("text")
+                            .transition()
+                            .duration(250)
+                            .attr("font-size", "1em")
+                            .attr("x", 8)
+                            .attr("y", 4)
+                    }
+                })
+                .call(force.drag);
+
+            //CIRCLE
+            node.append("svg:circle")
+                .attr("cx", function (d) {
+                    return d.x;
+                })
+                .attr("cy", function (d) {
+                    return d.y;
+                })
+                .attr("r", circleWidth)
+                .attr("fill", function (d, i) {
+                    if (!d.root) {
+                        return palette.blue;
+                    } else {
+                        return palette.red
+                    }
+                });
+
+            //TEXT
+            node.append("text")
+                .text(function (d, i) {
+                    return d.name;
+                })
+                .attr("x", function (d, i) {
+                    return circleWidth + 5;
+                })
+                .attr("y", function (d, i) {
+                    if (!d.root) {
+                        return circleWidth
+                    } else {
+                        return circleWidth + 5
+                    }
+                })
+                .attr("font-family", "Bree Serif")
+                .attr("fill", function (d, i) {
+                    return palette.white;
+                })
+                .attr("font-size", function (d, i) {
+                    return "1em";
+                })
+                .attr("text-anchor", function (d, i) {
+                    if (!d.root) {
+                        return "beginning";
+                    } else {
+                        return "end"
+                    }
+                });
+
+
+            force.on("tick", function (e) {
+                node.attr("transform", function (d, i) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+
+                link.attr("x1", function (d) {
+                        return d.source.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    })
+            });
+
+            force.start();
+        }
+    }
+})();
+
 /**
- Configuration Controller
- This controller allows to add, remove nodes or links.
+ * AngularJS
+ * Configuration Controller
+ * This controller allows to add, remove nodes or links.
  */
 graph.app.controller('ConfigController', function ($scope) {
     var previousRootNode = {};
@@ -114,13 +294,16 @@ graph.app.controller('ConfigController', function ($scope) {
         console.log('addLink');
         console.log(source);
         console.log(target);
-        $scope.links.push({
-            source: $scope.nodes[source],
-            target: $scope.nodes[target]
-        });
-        $scope.source = -1;
-        $scope.target = -1;
-        initializeDisableItem();
+        if (source !== -1 && target !== -1) {
+            $scope.links.push({
+                source: $scope.nodes[source],
+                target: $scope.nodes[target]
+            });
+            $scope.source = -1;
+            $scope.target = -1;
+            initializeDisableItem();
+        } else
+            alert('Please, select two nodes');
     };
 
     /**

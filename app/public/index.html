@@ -9,7 +9,6 @@
 </head>
 <body>
 <div id="app" ng-app="GraphBDFS">
-
     <!-- Modal content -->
     <div class="modal-content" id="modal-config" ng-controller="ConfigController">
         <div class="modal-header">
@@ -42,7 +41,6 @@
                         <td><input type="checkbox" ng-model="node.root" ng-change="rootChange(node)"></td>
                         <td><button class="button-xsmall pure-button" ng-click="removeNode($index)">X</button></td>
                     </tr>
-
                     </tbody>
                 </table>
             </div>
@@ -91,7 +89,8 @@
 </div>
 
 <footer>
-    <p>Copyright 2016 Ysée Monnier</p>
+    <p>Copyright 2016 <a href="http://www.yseemonnier.com/#/en/profile">Ysée Monnier</a></p>
+    <p><a href="https://github.com/YMonnier/GraphBDFS">GitHub Project</a></p>
 </footer>
 <script src="js/jquery.js"></script>
 <script src="js/angular.min.js.map"></script>
