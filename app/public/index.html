@@ -1,26 +1,53 @@
 <!DOCTYPE HTML>
-<html>
+<html >
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Graph and Network Theory</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pure-min.css">
 </head>
 <body>
-<div id="app">
+<div id="app" ng-app="GraphBDFS">
 
     <!-- Modal content -->
-    <div class="modal-content" id="modal-config">
+    <div class="modal-content" id="modal-config" ng-controller="ConfigController">
         <div class="modal-header">
             <h2>Configuration</h2>
         </div>
         <div class="modal-body">
-            <h4>Nodes</h4>
-            <p>name: <input type="text" id="input-node">
-                <button id="add-node" class="btn">Add</button>
-            </p>
+            <h4></h4>
 
+
+            <form name="nodeForm" class="pure-control-group pure-form" ng-submit="addNode(nodeName)">
+                <legend>Nodes</legend>
+                <div class=" pure-form-aligned">
+                    <label for="input-node">name</label>
+                    <input id="input-node" name="input-node" type="text" placeholder="add a new Node" ng-model="nodeName" required>
+                    <input id="add-node" class="pure-button pure-button-primary"  type="submit" value="Add">
+                </div>
+
+            </form>
             <div id="nodes">
-                <p>[<span></span>]</p>
+                <table class="pure-table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Node</th>
+                        <th>Root</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr ng-repeat="node in nodes">
+                        <td>{{ $index }}</td>
+                        <td>{{ node.name }}</td>
+                        <td><input type="checkbox" ng-model="node.root" ng-change="rootChange(node)"></td>
+                    </tr>
+
+                    </tbody>
+                </table>
+                {{ nodes }}
             </div>
 
 
@@ -33,7 +60,7 @@
                 <select name="target-picker" id="target">
                     <option value="-1"></option>
                 </select>
-                <button id="add-link" class="btn">Add</button>
+                <button id="add-link" class="button-small pure-button">Add</button>
             </p>
 
             <table id="links">
@@ -48,7 +75,7 @@
             </table>
         </div>
         <div class="modal-footer">
-            <button class="btn" id="finish">Finish</button>
+            <button class="btn" id="pure-button pure-button-primary">Finish</button>
         </div>
     </div>
 
@@ -58,6 +85,7 @@
     <p>Copyright 2016 Ysée Monnier</p>
 </footer>
 <script src="js/jquery.js"></script>
+<script src="js/angular.min.js.map"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/app.js"></script>
 </body>

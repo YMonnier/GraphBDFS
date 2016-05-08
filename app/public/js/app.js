@@ -1,18 +1,26 @@
 /**
  * Created by Ysee on 07/05/16.
+ *
  */
+
+
 var graph  = (function() {
     return {
+        app: angular.module('GraphBDFS', []),
         modules: {},
         nodes: [],
         links: []
     }
 })();
 
-graph.modules.config = (function() {
+graph.modules.datastruct = (function() {
     var index = 0;
     return {
         init: function() {
+
+
+        },
+        test: function() {
             //                    modal.css("display", "none");//.style.display = "none";
             var modal = $('#modal-config');
             $('#add-node').click(function(e) {
@@ -36,7 +44,7 @@ graph.modules.config = (function() {
             });
         },
         addNode: function(inputName) {
-            var name = inputName.val()
+            var name = inputName.val();
             var t = $('#nodes span').text() + (graph.nodes.length != 0 ? ', ' : '') + name;
             $('#nodes span').text(t);
 
@@ -63,8 +71,42 @@ graph.modules.config = (function() {
         }
     }
 })();
+/*
+    Configuration Controller
+    This controller car add, remove nodes or links.
+ */
+graph.app.controller('ConfigController', function ($scope) {
+    console.log('OK');
+    var previousRootNode = {};
+    $scope.nodes = [];
+    $scope.links = [];
 
+    /**
+     * Add a new node
+     * @param nodeName, node's name
+     */
+    $scope.addNode = function(nodeName) {
+        var nf =  $scope.nodes.filter(function(node) {
+            return node.name == nodeName
+        });
+        console.log(nf);
+        if(nf.length == 0) {
+            $scope.nodes.push({
+                name: nodeName,
+                neighbors: [],
+                root: false
+            });
+        } else {
+            alert('Node already exists.\nPlease choose another node\'s name');
+        }
 
-$(document).ready(function () {
-    graph.modules.config.init();
+        $scope.nodeName = '';
+    };
+    $scope.rootChange = function(node) {
+        if (previousRootNode != node) {
+            previousRootNode.root = false;
+        }
+        previousRootNode = node;
+    }
+
 });
