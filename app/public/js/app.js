@@ -28,7 +28,6 @@ graph.modules.datastruct = (function () {
 graph.app.controller('ConfigController', function ($scope) {
     console.log('OK');
     var previousRootNode = {};
-    var previousDisableLink = 0;
     $scope.nodes = [];
     $scope.links = [];
 
@@ -41,7 +40,7 @@ graph.app.controller('ConfigController', function ($scope) {
         var nf = $scope.nodes.filter(function (node) {
             return node.name == nodeName
         });
-        if (nf.length == 0) { //node doesn't exist
+        if (nf.length == 0 && nodeName) { //node doesn't exist
             $scope.nodes.push({
                 name: nodeName,
                 root: $scope.nodes.length == 0,
@@ -61,6 +60,7 @@ graph.app.controller('ConfigController', function ($scope) {
      * @param index, node's index to remove
      */
     $scope.removeNode = function (index) {
+        updateLinks($scope.nodes[index]);
         $scope.nodes.splice(index, 1);
         if ($scope.nodes.length > 0 && index == 0)
             $scope.nodes[0].root = true
@@ -93,12 +93,7 @@ graph.app.controller('ConfigController', function ($scope) {
         });
         $scope.source = -1;
         $scope.target = -1;
-        $scope.nodes.forEach(function (n) {
-            n.disabled.source = false;
-            n.disabled.target = false;
-        });
-        //$scope.nodes[previousDisableLink].disabled.source = false;
-        //$scope.nodes[previousDisableLink].disabled.target = false;
+        initializeDisableItem();
     };
 
     /**
@@ -108,63 +103,88 @@ graph.app.controller('ConfigController', function ($scope) {
      * @param index, node's index
      */
     $scope.disabledChange = function (select, index) {
-        //$scope.nodes[previousDisableLink].disabled.source = false;
-        //$scope.nodes[previousDisableLink].disabled.target = false;
         if (index != -1) {
-            console.log('disabledChange function...');
-            console.log(select);
-            console.log(index);
+
+            if($scope.source == $scope.target) {
+                initializeDisableItem();
+                $scope.source = -1;
+                $scope.target = -1;
+                return;
+            }
 
             switch (select) {
                 case 'source':
-                    //$scope.target = -1;
                     console.log('$scope.target : ' + $scope.target);
                     if ($scope.target == -1) {
-                        $scope.nodes[index].disabled.target = true;
-                        $scope.links.forEach(function (l) {
-                            if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
-                                l.source.disabled.target = true;
-                                l.target.disabled.target = true;
-                            } else {
-                                l.source.disabled.target = false;
-                                l.target.disabled.target = false;
-                            }
-                        });
-                    } else
-                        $scope.target = -1;
+                        filterTarget(index);
+                    }
                     break;
                 case 'target':
                     //$scope.source = -1;
                     if ($scope.source == -1) {
-                        $scope.nodes[index].disabled.source = true;
-                        $scope.links.forEach(function (l) {
-                            if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
-                                l.source.disabled.source = true;
-                                l.target.disabled.source = true;
-                            } else {
-                                l.source.disabled.source = false;
-                                l.target.disabled.source = false;
-                            }
-                        });
-                    } else
-                        $scope.source = -1;
+                        filterSource(index);
+                    }
                     break;
             }
             previousDisableLink = $scope.nodes[index];
         }
-        //init();
 
-        function init() {
-            $scope.nodes.forEach(function (n) {
-                n.disabled.source = false;
-                n.disabled.target = false;
-            })
+        /**
+         * Filter source checkbox depending on node target selected
+         * @param index, index node target selected
+         */
+        function filterSource(index) {
+            $scope.nodes[index].disabled.source = true;
+            $scope.links.forEach(function (l) {
+                if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
+                    l.source.disabled.source = true;
+                    l.target.disabled.source = true;
+                } else {
+                    l.source.disabled.source = false;
+                    l.target.disabled.source = false;
+                }
+            });
         }
 
-        function disabledElement(select) {
-            $scope.links.forEach(function (link) {
-
+        /**
+         * Filter target checkbox depending on node source selected
+         * @param index, index node source selected
+         */
+        function filterTarget(index) {
+            $scope.nodes[index].disabled.target = true;
+            $scope.links.forEach(function (l) {
+                if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
+                    l.source.disabled.target = true;
+                    l.target.disabled.target = true;
+                } else {
+                    l.source.disabled.target = false;
+                    l.target.disabled.target = false;
+                }
             });
         }
     };
+
+    function updateLinks(node) {
+        console.log('updateLinks...');
+        console.log($scope.links.length);
+
+        var tmp = $scope.links.filter(function (l) {
+            console.log(l.source.name != node.name && l.target.name != node.name);
+            if(l.source.name !== node.name && l.target.name !== node.name)
+                return true;
+            else
+                return false;
+            //return l.source.name == node.name || l.target.name != node.name
+        });
+        console.log('TMP :: ' + tmp.length);
+        $scope.links = tmp;
+        console.log($scope.links.length);
+    }
+
+    function initializeDisableItem() {
+        $scope.nodes.forEach(function (n) {
+            n.disabled.source = false;
+            n.disabled.target = false;
+        })
+    }
 });
