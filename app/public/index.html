@@ -9,89 +9,86 @@
 </head>
 <body>
 <div id="app" ng-app="GraphBDFS">
-    <!-- Modal content -->
-    <div class="modal-content" id="modal-config" ng-controller="ConfigController">
-        <div class="modal-header">
-            <h2>Configuration</h2>
-        </div>
-        <div class="modal-body">
-            <form name="nodeForm" class="pure-control-group pure-form" ng-submit="addNode(nodeName)">
-                <legend>Nodes</legend>
-                <div class=" pure-form-aligned">
-                    <label for="input-node">Name</label>
-                    <input id="input-node" name="input-node" type="text" placeholder="add a new Node" ng-model="nodeName" required>
-                    <input id="add-node" class="pure-button pure-button-primary"  type="submit" value="Add">
-                </div>
-            </form>
-            <div id="nodes">
-                <table class="pure-table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Node</th>
-                        <th>Root</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <tr ng-repeat="node in nodes">
-                        <td>{{ $index }}</td>
-                        <td>{{ node.name }}</td>
-                        <td><input type="checkbox" ng-model="node.root" ng-change="rootChange(node)"></td>
-                        <td><button class="button-xsmall pure-button" ng-click="removeNode($index)">X</button></td>
-                    </tr>
-                    </tbody>
-                </table>
+    <h3>Breadth First Search and Deep First Search Algorithms</h3>
+    <div id="menu" ng-controller="ConfigController" class="pure-u-1-4">
+        <form name="nodeForm" class="pure-control-group pure-form" ng-submit="addNode(nodeName)">
+            <legend>Nodes</legend>
+            <div class=" pure-form-aligned">
+                <label for="input-node">Name</label>
+                <input id="input-node" name="input-node" type="text" placeholder="add a new Node" ng-model="nodeName" required>
+                <input id="add-node" class="pure-button pure-button-primary"  type="submit" value="Add">
             </div>
-
-            <form name="linkForm" class="pure-control-group pure-form" ng-submit="addLink(source, target)">
-                <legend>Links</legend>
-                <div class=" pure-form-aligned">
-                    <label for="source-picker">Source</label>
-                    <select name="source-picker" id="source-picker" ng-model="source" ng-init="source=-1" ng-change="disabledChange('source', source)" required>
-                        <option value="{{$index}}" ng-disabled="node.disabled.source" ng-repeat="node in nodes">{{ node.name }}</option>
-                    </select>
-
-                    <label for="target-picker">Target</label>
-                    <select name="target-picker" id="target-picker" ng-model="target" ng-init="target=-1" ng-change="disabledChange('target', target)" required>
-                        <option value="{{$index}}" ng-disabled="node.disabled.target" ng-repeat="node in nodes">{{ node.name }}</option>
-                    </select>
-                    <input class="pure-button pure-button-primary"  type="submit" value="Add">
-                </div>
-            </form>
-
+        </form>
+        <div id="nodes">
             <table class="pure-table">
                 <thead>
                 <tr>
-                    <th>Source</th>
-                    <th></th>
-                    <th>Target</th>
+                    <th>#</th>
+                    <th>Node</th>
+                    <th>Root</th>
                     <th></th>
                 </tr>
                 </thead>
 
                 <tbody>
-                <tr ng-repeat="link in links">
-                    <td>{{ link.source.name }}</td>
-                    <td>-></td>
-                    <td>{{ link.target.name }}</td>
-                    <td><button class="button-xsmall pure-button ">X</button></td>
+                <tr ng-repeat="node in nodes">
+                    <td>{{ $index }}</td>
+                    <td>{{ node.name }}</td>
+                    <td><input type="checkbox" ng-model="node.root" ng-change="rootChange(node)"></td>
+                    <td><button class="button-xsmall pure-button" ng-click="removeNode($index)">X</button></td>
                 </tr>
                 </tbody>
             </table>
         </div>
-        <div class="modal-footer">
-            <button class="pure-button pure-button-primary" id="finish" ng-click="nextStep()">Finish</button>
-        </div>
+
+        <form name="linkForm" class="pure-control-group pure-form" ng-submit="addLink(source, target)">
+            <legend>Links</legend>
+            <div class=" pure-form-aligned">
+                <label for="source-picker">Source</label>
+                <select name="source-picker" id="source-picker" ng-model="source" ng-init="source=-1" ng-change="disabledChange('source', source)" required>
+                    <option value="{{$index}}" ng-disabled="node.disabled.source" ng-repeat="node in nodes">{{ node.name }}</option>
+                </select>
+
+                <label for="target-picker">Target</label>
+                <select name="target-picker" id="target-picker" ng-model="target" ng-init="target=-1" ng-change="disabledChange('target', target)" required>
+                    <option value="{{$index}}" ng-disabled="node.disabled.target" ng-repeat="node in nodes">{{ node.name }}</option>
+                </select>
+                <input class="pure-button pure-button-primary"  type="submit" value="Add">
+            </div>
+        </form>
+
+        <table class="pure-table">
+            <thead>
+            <tr>
+                <th>Source</th>
+                <th></th>
+                <th>Target</th>
+                <th></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr ng-repeat="link in links">
+                <td>{{ link.source.name }}</td>
+                <td>-></td>
+                <td>{{ link.target.name }}</td>
+                <td><button class="button-xsmall pure-button ">X</button></td>
+            </tr>
+            </tbody>
+        </table>
+        <button class="pure-button pure-button-primary" id="finish" ng-click="nextStep()">Finish</button>
+
+        <footer>
+            <p>Copyright 2016 <a href="http://www.yseemonnier.com/#/en/profile">Ysée Monnier</a></p>
+            <p><a href="https://github.com/YMonnier/GraphBDFS">GitHub Project</a></p>
+        </footer>
     </div>
 
+    <div id="content" class="pure-u-3-4">
+
+    </div>
 </div>
 
-<footer>
-    <p>Copyright 2016 <a href="http://www.yseemonnier.com/#/en/profile">Ysée Monnier</a></p>
-    <p><a href="https://github.com/YMonnier/GraphBDFS">GitHub Project</a></p>
-</footer>
 <script src="js/jquery.js"></script>
 <script src="js/angular.min.js.map"></script>
 <script src="js/d3.min.js"></script>

@@ -1,20 +1,43 @@
 body {
-    margin-top: 50px !important;
+    /*margin-top: 50px !important;*/
     background: #042029;
-    height: 90vh;
+    height: 80vh;
     font-family: Avenir;
     font-weight: lighter;
-    font-size: 19px;
+    font-size: 16px;
+}
+
+#menu{
+    float: left;
+    height:100%;
+    border-right: solid white 1px;
+    font-size: 14px;
+    background-color: white;
+    overflow:scroll;
+}
+
+#content {
+    width:70%;
+    height:100%;
+    float:left;
 }
 
 #app {
     height: 100%;
 }
-a {
+
+h3 {
+    text-align:  center;
     color: white;
 }
+
+a {
+    color: black;
+}
 footer {
-    color: white;
+    float: left;
+    color: black;
+
 }
 
 footer p {
@@ -33,7 +56,7 @@ table th, table tr {
 /* button */
 
 #finish {
-    float: right;
+    width: 100%;
 }
 
 /* Modal Header */

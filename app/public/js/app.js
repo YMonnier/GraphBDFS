@@ -29,46 +29,28 @@ graph.modules.datastruct = (function () {
             console.log(nodes);
             graph.nodes = nodes;
             graph.links = links;
-            $('#modal-config').css('display', 'none');
-            graph.modules.engin.init();
+            graph.modules.engin.repaint();
         }
     }
 })();
 
 graph.modules.engin = (function () {
-    var w, h, circleWidth, engin, force, link, node;
+    var w, h, circleWidth, svgApp, force, link, node;
     var palette = {
         "white": "#FFFFFF",
-        "lightgray": "#819090",
         "gray": "#708284",
-        "mediumgray": "#536870",
-        "darkgray": "#475B62",
-        "darkblue": "#0A2933",
-        "darkerblue": "#042029",
-        "paleryellow": "#FCF4DC",
-        "paleyellow": "#EAE3CB",
-        "yellow": "#A57706",
         "orange": "#BD3613",
         "red": "#D11C24",
-        "pink": "#C61C6F",
-        "purple": "#595AB7",
-        "blue": "#2176C7",
-        "green": "#259286",
-        "yellowgreen": "#738A05"
+        "blue": "#2176C7"
     };
     return {
         init: function () {
-            w = window.innerWidth
-                || document.documentElement.clientWidth
-                || document.body.clientWidth;
-
-            h = window.innerHeight
-                || document.documentElement.clientHeight
-                || document.body.clientHeight;
+            h = $('#content').height();
+            w = $('#content').width();
 
             circleWidth = 7;
 
-            engin = d3.select("#app")
+            svgApp = d3.select("#content")
                 .append("svg:svg")
                 .attr("class", "stage")
                 .attr("width", w)
@@ -81,20 +63,40 @@ graph.modules.engin = (function () {
                 .charge(-1000)
                 .size([w, h]);
 
-            link = engin.selectAll(".link")
-                .data(graph.links)
-                .enter().append("line")
+
+            //console.log(nodes);
+            //nodes.push({})
+            graph.modules.engin.repaint();
+        },
+        repaint: function(){
+            console.log('update');
+            //var nodes = force.nodes(),
+              //  links = force.links(),
+
+            //link = link.data(graph.links);
+
+            var nodes = force.nodes();
+            var links = force.links();
+            console.log(nodes);
+            console.log(links);
+            console.log(graph.nodes);
+            console.log(graph.links);
+
+            link = svgApp.selectAll(".link")
+                .data(links);
+            link.enter().append("line")
                 .attr("class", "link")
                 .attr("stroke", palette.gray)
                 .attr("fill", "none");
+            link.exit().remove();
 
-            node = engin.selectAll("circle.node")
-                .data(graph.nodes)
-                .enter().append("g")
+
+            node = svgApp.selectAll("circle.node")
+                .data(nodes);
+            node.enter().append("g")
                 .attr("class", "node")
                 .on("mouseover", function (d, i) {    //MOUSEOVER
                     if (!d.root) {
-                        //CIRCLE
                         d3.select(this).selectAll("circle")
                             .transition()
                             .duration(250)
@@ -102,7 +104,6 @@ graph.modules.engin = (function () {
                             .attr("r", circleWidth + 3)
                             .attr("fill", palette.orange);
 
-                        //TEXT
                         d3.select(this).select("text")
                             .transition()
                             .style("cursor", "none")
@@ -112,11 +113,9 @@ graph.modules.engin = (function () {
                             .attr("x", 15)
                             .attr("y", 5)
                     } else {
-                        //CIRCLE
                         d3.select(this).selectAll("circle")
                             .style("cursor", "none");
 
-                        //TEXT
                         d3.select(this).select("text")
                             .style("cursor", "none");
                     }
@@ -141,7 +140,6 @@ graph.modules.engin = (function () {
                 })
                 .call(force.drag);
 
-            //CIRCLE
             node.append("svg:circle")
                 .attr("cx", function (d) {
                     return d.x;
@@ -158,7 +156,6 @@ graph.modules.engin = (function () {
                     }
                 });
 
-            //TEXT
             node.append("text")
                 .text(function (d, i) {
                     return d.name;
@@ -188,6 +185,7 @@ graph.modules.engin = (function () {
                     }
                 });
 
+            node.exit().remove();
 
             force.on("tick", function (e) {
                 node.attr("transform", function (d, i) {
@@ -209,6 +207,9 @@ graph.modules.engin = (function () {
             });
 
             force.start();
+        },
+        insertNode: function() {
+
         }
     }
 })();
@@ -220,8 +221,10 @@ graph.modules.engin = (function () {
  */
 graph.app.controller('ConfigController', function ($scope) {
     var previousRootNode = {};
-    $scope.nodes = [];
-    $scope.links = [];
+    $scope.nodes = graph.nodes;
+    $scope.links = graph.links;
+
+    graph.modules.engin.init();
 
     $scope.nextStep = function () {
         console.log($scope.nodes.length === 0);
@@ -255,6 +258,7 @@ graph.app.controller('ConfigController', function ($scope) {
             });
             if ($scope.nodes.length > 0)
                 previousRootNode = $scope.nodes[0];
+            graph.modules.engin.repaint();
         } else {
             alert('Node already exists.\nPlease choose another node\'s name');
         }
