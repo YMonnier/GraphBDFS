@@ -23,6 +23,18 @@ table th, table tr {
     text-align: center;
 }
 
+/* button */
+.btn {
+    background-color: #114079;
+    color: white;
+    font-size: 18px;
+    border: solid #d5d5d5 2px;
+}
+#finish {
+    float: right;
+}
+
+
 /* Modal Header */
 .modal-header {
     padding: 2px 16px;
@@ -38,6 +50,7 @@ table th, table tr {
     padding: 2px 16px;
     background-color: #114079;
     color: white;
+    height:35px;
 }
 
 /* Modal Content */

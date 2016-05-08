@@ -16,7 +16,7 @@
         <div class="modal-body">
             <h4>Nodes</h4>
             <p>name: <input type="text" id="input-node">
-                <button id="add-node">Add</button>
+                <button id="add-node" class="btn">Add</button>
             </p>
 
             <div id="nodes">
@@ -24,42 +24,31 @@
             </div>
 
 
-
-
-
-
             <h4>Links</h4>
             <p>Source:
                 <select name="source-picker" id="source">
+                    <option value="-1"></option>
                 </select>
                 Target:
                 <select name="target-picker" id="target">
+                    <option value="-1"></option>
                 </select>
-                <button id="add-link">Add</button>
+                <button id="add-link" class="btn">Add</button>
             </p>
-            <div id="links">
-                <table>
-                    <tr>
-                        <th>Source</th>
-                        <th></th>
-                        <th>Target</th>
-                    </tr>
-                    <tr>
-                        <td>A</td>
-                        <td>-></td>
-                        <td>A</td>
-                    </tr>
-                    <tr>
-                        <td>A</td>
-                        <td>-></td>
-                        <td>B</td>
-                    </tr>
-                </table>
 
-            </div>
+            <table id="links">
+                <tr>
+                    <th>Source</th>
+                    <th></th>
+                    <th>Target</th>
+                </tr>
+                <div >
+
+                </div>
+            </table>
         </div>
         <div class="modal-footer">
-            <button>Finish</button>
+            <button class="btn" id="finish">Finish</button>
         </div>
     </div>
 

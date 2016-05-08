@@ -24,8 +24,15 @@ graph.modules.config = (function() {
             });
             $('#add-link').click(function(e) {
                 console.log('Click add link');
-                var s = $('#source').find(":selected").text();
-                var t = $('#target').find(":selected").text();
+                var s = $('#source').find(":selected");
+                var t = $('#target').find(":selected");
+                console.log(s.text());
+                console.log(t.text());
+                if (s.val() != t.val()) {
+                    graph.modules.config.addLink(s, t);
+                } else {
+
+                }
             });
         },
         addNode: function(inputName) {
@@ -41,10 +48,18 @@ graph.modules.config = (function() {
             });
             inputName.val('');
             index++;
-            console.log(t);
+            console.log(graph.nodes);
         },
-        addLink: function() {
-
+        addLink: function(s, t) {
+            $('#source').append("<tr><td>" + s.text() + "</td><td>-></td><td>" + t.text() + "</td></tr>");
+            $('#links').append("<tr><td>" + s.text() + "</td><td>-></td><td>" + t.text() + "</td></tr>");
+            console.log('s: ' + s.val() + ' t: ' + t.val());
+            console.log(graph.nodes[s.val()]);
+            console.log(graph.nodes[t.val()]);
+            graph.links.push({
+                source: graph.nodes[s.val()], target: graph.nodes[t.val()]
+            });
+            console.log(graph.links);
         }
     }
 })();
