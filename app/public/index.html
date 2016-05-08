@@ -16,17 +16,13 @@
             <h2>Configuration</h2>
         </div>
         <div class="modal-body">
-            <h4></h4>
-
-
             <form name="nodeForm" class="pure-control-group pure-form" ng-submit="addNode(nodeName)">
                 <legend>Nodes</legend>
                 <div class=" pure-form-aligned">
-                    <label for="input-node">name</label>
+                    <label for="input-node">Name</label>
                     <input id="input-node" name="input-node" type="text" placeholder="add a new Node" ng-model="nodeName" required>
                     <input id="add-node" class="pure-button pure-button-primary"  type="submit" value="Add">
                 </div>
-
             </form>
             <div id="nodes">
                 <table class="pure-table">
@@ -35,6 +31,7 @@
                         <th>#</th>
                         <th>Node</th>
                         <th>Root</th>
+                        <th></th>
                     </tr>
                     </thead>
 
@@ -43,6 +40,7 @@
                         <td>{{ $index }}</td>
                         <td>{{ node.name }}</td>
                         <td><input type="checkbox" ng-model="node.root" ng-change="rootChange(node)"></td>
+                        <td><button class="button-xsmall pure-button" ng-click="removeNode($index)">X</button></td>
                     </tr>
 
                     </tbody>
@@ -50,32 +48,45 @@
                 {{ nodes }}
             </div>
 
+            <form name="linkForm" class="pure-control-group pure-form" ng-submit="addLink(source, target)">
+                <legend>Links</legend>
+                <div class=" pure-form-aligned">
+                    <label for="source-picker">Source</label>
+                    <select name="source-picker" id="source-picker" ng-model="source" ng-init="source=-1" ng-change="disabledChange('source', source)" required>
+                        <option value="{{$index}}" ng-disabled="node.disabled.source" ng-repeat="node in nodes">{{ node.name }}</option>
+                    </select>
 
-            <h4>Links</h4>
-            <p>Source:
-                <select name="source-picker" id="source">
-                    <option value="-1"></option>
-                </select>
-                Target:
-                <select name="target-picker" id="target">
-                    <option value="-1"></option>
-                </select>
-                <button id="add-link" class="button-small pure-button">Add</button>
-            </p>
+                    <label for="target-picker">Target</label>
+                    <select name="target-picker" id="target-picker" ng-model="target" ng-init="target=-1" ng-change="disabledChange('target', target)" required>
+                        <option value="{{$index}}" ng-disabled="node.disabled.target" ng-repeat="node in nodes">{{ node.name }}</option>
+                    </select>
+                    <input class="pure-button pure-button-primary"  type="submit" value="Add">
+                </div>
+            </form>
 
-            <table id="links">
+            <table class="pure-table">
+                <thead>
                 <tr>
                     <th>Source</th>
                     <th></th>
                     <th>Target</th>
+                    <th></th>
                 </tr>
-                <div >
+                </thead>
 
-                </div>
+                <tbody>
+                <tr ng-repeat="link in links">
+                    <td>{{ link.source.name }}</td>
+                    <td>-></td>
+                    <td>{{ link.target.name }}</td>
+                    <td><button class="button-xsmall pure-button ">X</button></td>
+                </tr>
+
+                </tbody>
             </table>
         </div>
         <div class="modal-footer">
-            <button class="btn" id="pure-button pure-button-primary">Finish</button>
+            <button class="pure-button pure-button-primary" id="finish">Finish</button>
         </div>
     </div>
 

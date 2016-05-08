@@ -18,40 +18,43 @@ footer {
 footer p {
     text-align: center;
 }
+
 /* Table */
+table {
+    margin-top: 30px;
+}
 table th, table tr {
     width: 70px;
     text-align: center;
 }
 
 /* button */
-.btn {
-    background-color: #114079;
-    color: white;
-    font-size: 18px;
-    border: solid #d5d5d5 2px;
-}
+
 #finish {
     float: right;
 }
-
 
 /* Modal Header */
 .modal-header {
     padding: 2px 16px;
     background-color: #114079;
     color: white;
+    margin-bottom: 30px;
 }
 
+
 /* Modal Body */
-.modal-body {padding: 2px 16px;}
+.modal-body {
+    padding: 2px 16px;
+}
 
 /* Modal Footer */
 .modal-footer {
+    margin-top: 30px;
     padding: 2px 16px;
     background-color: #114079;
     color: white;
-    height:35px;
+    height: 45px;
 }
 
 /* Modal Content */
@@ -62,7 +65,7 @@ table th, table tr {
     padding: 0;
     border: 1px solid #888;
     width: 80%;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
@@ -71,11 +74,23 @@ table th, table tr {
 
 /* Add Animation */
 @-webkit-keyframes animatetop {
-    from {top: -300px; opacity: 0}
-    to {top: 0; opacity: 1}
+    from {
+        top: -300px;
+        opacity: 0
+    }
+    to {
+        top: 0;
+        opacity: 1
+    }
 }
 
 @keyframes animatetop {
-    from {top: -300px; opacity: 0}
-    to {top: 0; opacity: 1}
+    from {
+        top: -300px;
+        opacity: 0
+    }
+    to {
+        top: 0;
+        opacity: 1
+    }
 }
