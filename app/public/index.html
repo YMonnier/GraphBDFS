@@ -45,7 +45,6 @@
 
                     </tbody>
                 </table>
-                {{ nodes }}
             </div>
 
             <form name="linkForm" class="pure-control-group pure-form" ng-submit="addLink(source, target)">
@@ -83,10 +82,9 @@
                 </tr>
                 </tbody>
             </table>
-            {{links}}
         </div>
         <div class="modal-footer">
-            <button class="pure-button pure-button-primary" id="finish">Finish</button>
+            <button class="pure-button pure-button-primary" id="finish" ng-click="nextStep()">Finish</button>
         </div>
     </div>
 

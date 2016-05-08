@@ -15,21 +15,46 @@ var graph = (function () {
 
 graph.modules.datastruct = (function () {
     return {
-        init: function () {
+        init: function (nodes, links) {
+            //graph.nodes = nodes;
+            //graph.links = links;
 
-
+            nodes.forEach(function (node) {
+                links.forEach(function (link) {
+                    if (link.source === node) {
+                        if (!node.neighbours.includes(link.target))
+                            node.neighbours.push(link.target)
+                    } else if (link.target === node) {
+                        if (!node.neighbours.includes(link.source))
+                            node.neighbours.push(link.source)
+                    }
+                })
+            })
+            console.log(nodes);
         }
     }
 })();
 /**
  Configuration Controller
- This controller car add, remove nodes or links.
+ This controller allows to add, remove nodes or links.
  */
 graph.app.controller('ConfigController', function ($scope) {
-    console.log('OK');
     var previousRootNode = {};
     $scope.nodes = [];
     $scope.links = [];
+
+    $scope.nextStep = function () {
+        console.log($scope.nodes.length === 0);
+        console.log($scope.links.length === 0);
+        console.log($scope.nodes.length === 0 || $scope.links.length === 0);
+        if ($scope.nodes.length === 0 || $scope.links.length === 0) {
+            console.log('HERE??');
+            alert('Please, add nodes or edges.');
+        } else {
+            console.log('INI DATASTRUCT');
+            graph.modules.datastruct.init($scope.nodes, $scope.links);
+        }
+    };
 
     /**
      * Add a new node
@@ -38,12 +63,14 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.addNode = function (nodeName) {
         //filter same node
         var nf = $scope.nodes.filter(function (node) {
-            return node.name == nodeName
+            return node.name === nodeName
         });
         if (nf.length == 0 && nodeName) { //node doesn't exist
             $scope.nodes.push({
                 name: nodeName,
-                root: $scope.nodes.length == 0,
+                visited: false,
+                root: $scope.nodes.length === 0,
+                neighbours: [],
                 disabled: {source: false, target: false}
             });
             if ($scope.nodes.length > 0)
@@ -62,7 +89,7 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.removeNode = function (index) {
         updateLinks($scope.nodes[index]);
         $scope.nodes.splice(index, 1);
-        if ($scope.nodes.length > 0 && index == 0)
+        if ($scope.nodes.length > 0 && index === 0)
             $scope.nodes[0].root = true
     };
 
@@ -105,7 +132,7 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.disabledChange = function (select, index) {
         if (index != -1) {
 
-            if($scope.source == $scope.target) {
+            if ($scope.source === $scope.target) {
                 initializeDisableItem();
                 $scope.source = -1;
                 $scope.target = -1;
@@ -115,13 +142,13 @@ graph.app.controller('ConfigController', function ($scope) {
             switch (select) {
                 case 'source':
                     console.log('$scope.target : ' + $scope.target);
-                    if ($scope.target == -1) {
+                    if ($scope.target === -1) {
                         filterTarget(index);
                     }
                     break;
                 case 'target':
                     //$scope.source = -1;
-                    if ($scope.source == -1) {
+                    if ($scope.source === -1) {
                         filterSource(index);
                     }
                     break;
@@ -136,7 +163,7 @@ graph.app.controller('ConfigController', function ($scope) {
         function filterSource(index) {
             $scope.nodes[index].disabled.source = true;
             $scope.links.forEach(function (l) {
-                if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
+                if (l.source === $scope.nodes[index] || l.target === $scope.nodes[index]) {
                     l.source.disabled.source = true;
                     l.target.disabled.source = true;
                 } else {
@@ -153,7 +180,7 @@ graph.app.controller('ConfigController', function ($scope) {
         function filterTarget(index) {
             $scope.nodes[index].disabled.target = true;
             $scope.links.forEach(function (l) {
-                if (l.source == $scope.nodes[index] || l.target == $scope.nodes[index]) {
+                if (l.source === $scope.nodes[index] || l.target === $scope.nodes[index]) {
                     l.source.disabled.target = true;
                     l.target.disabled.target = true;
                 } else {
@@ -164,23 +191,25 @@ graph.app.controller('ConfigController', function ($scope) {
         }
     };
 
+    /**
+     * Update links, remove links which depended on the node
+     * @param node, node dependence
+     */
     function updateLinks(node) {
         console.log('updateLinks...');
         console.log($scope.links.length);
 
         var tmp = $scope.links.filter(function (l) {
-            console.log(l.source.name != node.name && l.target.name != node.name);
-            if(l.source.name !== node.name && l.target.name !== node.name)
-                return true;
-            else
-                return false;
-            //return l.source.name == node.name || l.target.name != node.name
+            return l.source.name !== node.name && l.target.name !== node.name
         });
         console.log('TMP :: ' + tmp.length);
         $scope.links = tmp;
         console.log($scope.links.length);
     }
 
+    /**
+     * Enable each choices for textBox
+     */
     function initializeDisableItem() {
         $scope.nodes.forEach(function (n) {
             n.disabled.source = false;
