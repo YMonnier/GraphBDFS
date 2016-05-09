@@ -45,6 +45,7 @@ graph.modules.engin = (function () {
     };
     return {
         init: function () {
+            console.log('graph.modules.engin.INIT......');
             h = $('#content').height();
             w = $('#content').width();
 
@@ -52,17 +53,16 @@ graph.modules.engin = (function () {
 
             svgApp = d3.select("#content")
                 .append("svg:svg")
-                .attr("class", "stage")
+                .attr("pointer-events", "all")
                 .attr("width", w)
-                .attr("height", h);
+                .attr("height", h)
+                .attr("viewBox", "0 0 " + w + " " + h)
+                .attr("perserveAspectRatio", "xMinYMid");
 
-            force = d3.layout.force()
-                .nodes(graph.nodes)
-                .links([])
-                .gravity(0.1)
-                .charge(-1000)
-                .size([w, h]);
+            force = d3.layout.force();
 
+            graph.nodes = force.nodes();
+            graph.links = force.links();
 
             //console.log(nodes);
             //nodes.push({})
@@ -77,6 +77,7 @@ graph.modules.engin = (function () {
 
             var nodes = force.nodes();
             var links = force.links();
+            console.log('BEFORE REPAINT');
             console.log(nodes);
             console.log(links);
             console.log(graph.nodes);
@@ -84,6 +85,7 @@ graph.modules.engin = (function () {
 
             link = svgApp.selectAll(".link")
                 .data(links);
+
             link.enter().append("line")
                 .attr("class", "link")
                 .attr("stroke", palette.gray)
@@ -91,20 +93,20 @@ graph.modules.engin = (function () {
             link.exit().remove();
 
 
-            node = svgApp.selectAll("circle.node")
+            node = svgApp.selectAll("g.node")
                 .data(nodes);
             node.enter().append("g")
                 .attr("class", "node")
-                .on("mouseover", function (d, i) {    //MOUSEOVER
+                .on("mouseover", function (d, i) {
                     if (!d.root) {
-                        d3.select(this).selectAll("circle")
+                        d3.select(this)//.selectAll("circle")
                             .transition()
                             .duration(250)
                             .style("cursor", "none")
                             .attr("r", circleWidth + 3)
                             .attr("fill", palette.orange);
 
-                        d3.select(this).select("text")
+                        d3.select(this)//.select("text")
                             .transition()
                             .style("cursor", "none")
                             .duration(250)
@@ -120,17 +122,17 @@ graph.modules.engin = (function () {
                             .style("cursor", "none");
                     }
                 })
-                .on("mouseout", function (d, i) { //MOUSEOUT
+                .on("mouseout", function (d, i) {
                     if (!d.root) {
                         //CIRCLE
-                        d3.select(this).selectAll("circle")
+                        d3.select(this)//.selectAll("circle")
                             .transition()
                             .duration(250)
                             .attr("r", circleWidth)
                             .attr("fill", palette.blue);
 
                         //TEXT
-                        d3.select(this).select("text")
+                        d3.select(this)//.select("text")
                             .transition()
                             .duration(250)
                             .attr("font-size", "1em")
@@ -165,7 +167,7 @@ graph.modules.engin = (function () {
                 })
                 .attr("y", function (d, i) {
                     if (!d.root) {
-                        return circleWidth
+                        return circleWidth - 2
                     } else {
                         return circleWidth + 5
                     }
@@ -206,10 +208,16 @@ graph.modules.engin = (function () {
                     })
             });
 
-            force.start();
-        },
-        insertNode: function() {
+            force.gravity(0.1)
+                .charge(-1000)
+                .size([w, h])
+                .start();
 
+            console.log('AFTER REPAINT');
+            console.log(nodes);
+            console.log(links);
+            console.log(graph.nodes);
+            console.log(graph.links);
         }
     }
 })();
@@ -220,16 +228,14 @@ graph.modules.engin = (function () {
  * This controller allows to add, remove nodes or links.
  */
 graph.app.controller('ConfigController', function ($scope) {
+    console.log('ConfigController INIT......');
+    graph.modules.engin.init();
     var previousRootNode = {};
     $scope.nodes = graph.nodes;
     $scope.links = graph.links;
 
-    graph.modules.engin.init();
 
     $scope.nextStep = function () {
-        console.log($scope.nodes.length === 0);
-        console.log($scope.links.length === 0);
-        console.log($scope.nodes.length === 0 || $scope.links.length === 0);
         if ($scope.nodes.length === 0 || $scope.links.length === 0) {
             console.log('HERE??');
             alert('Please, add nodes or edges.');
@@ -249,13 +255,21 @@ graph.app.controller('ConfigController', function ($scope) {
             return node.name === nodeName
         });
         if (nf.length == 0 && nodeName) { //node doesn't exist
-            $scope.nodes.push({
+            console.log('ADD');
+            graph.nodes.push({
                 name: nodeName,
                 visited: false,
                 root: $scope.nodes.length === 0,
                 neighbours: [],
                 disabled: {source: false, target: false}
             });
+            /*$scope.nodes.push({
+                name: nodeName,
+                visited: false,
+                root: $scope.nodes.length === 0,
+                neighbours: [],
+                disabled: {source: false, target: false}
+            });*/
             if ($scope.nodes.length > 0)
                 previousRootNode = $scope.nodes[0];
             graph.modules.engin.repaint();
