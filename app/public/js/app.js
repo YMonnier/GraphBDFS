@@ -1,8 +1,13 @@
 /**
  * Created by Ysee on 07/05/16.
- *
+ * Graph and Network Theory Project - University of Lodz - Poland
  */
 
+
+/**
+ * Global variable, module pattern
+ * @type {{app, modules, nodes, links}}
+ */
 var graph = (function () {
     return {
         app: angular.module('GraphBDFS', []),
@@ -12,11 +17,15 @@ var graph = (function () {
     }
 })();
 
+/**
+ *  Create the datas structure
+ *  Add Neighbours for each nodes
+ */
 graph.modules.datastruct = (function () {
     return {
-        init: function (nodes, links) {
-            nodes.forEach(function (node) {
-                links.forEach(function (link) {
+        init: function () {
+            graph.nodes.forEach(function (node) {
+                graph.links.forEach(function (link) {
                     if (link.source === node) {
                         if (!node.neighbours.includes(link.target))
                             node.neighbours.push(link.target)
@@ -26,20 +35,22 @@ graph.modules.datastruct = (function () {
                     }
                 })
             });
-            console.log(nodes);
-            graph.nodes = nodes;
-            graph.links = links;
             graph.modules.engin.repaint();
         }
     }
 })();
 
+/**
+ * Module engin. initiliaze svg panel, repaint panel
+ * Create nodes(handlers, text, circle, node) and links
+ * @type {{init, repaint}}
+ */
 graph.modules.engin = (function () {
     var w, h, circleWidth, svgApp, force;
     var palette = {
         "white": "#FFFFFF",
         "gray": "#708284",
-        "orange": "#BD3613",
+        "yellow": "#FFCB10",
         "red": "#D11C24",
         "blue": "#2176C7"
     };
@@ -64,24 +75,23 @@ graph.modules.engin = (function () {
             graph.nodes = force.nodes();
             graph.links = force.links();
 
-            //console.log(nodes);
-            //nodes.push({})
             graph.modules.engin.repaint();
         },
         repaint: function () {
             console.log('update');
 
+            //Get data
             var nodes = force.nodes();
             var links = force.links();
+
             console.log('BEFORE REPAINT');
             console.log(nodes);
             console.log(links);
             console.log(graph.nodes);
             console.log(graph.links);
 
-            var link = svgApp.selectAll(".link")
+            var link = svgApp.selectAll("line.link")
                 .data(links);
-
             var linkEnter = link.enter().append("line")
                 .attr("class", "link")
                 .attr("stroke", palette.gray)
@@ -93,6 +103,10 @@ graph.modules.engin = (function () {
                 .data(nodes, function (d) {
                     return d.name;
                 });
+
+            /**
+             * Adding node, catch event mouseover and mouseout
+             */
             var nodeEnter = node.enter().append("g")
                 .attr("class", "node")
                 .on("mouseover", function (d, i) {
@@ -102,7 +116,7 @@ graph.modules.engin = (function () {
                             .duration(250)
                             .style("cursor", "none")
                             .attr("r", circleWidth + 3)
-                            .attr("fill", palette.orange);
+                            .attr("fill", palette.yellow);
 
                         d3.select(this)//.select("text")
                             .transition()
@@ -118,6 +132,7 @@ graph.modules.engin = (function () {
 
                         d3.select(this).select("text")
                             .style("cursor", "none");
+
                     }
                 })
                 .on("mouseout", function (d, i) {
@@ -140,6 +155,9 @@ graph.modules.engin = (function () {
                 })
                 .call(force.drag);
 
+            /**
+             * Adding circle svg
+             */
             nodeEnter.append("svg:circle")
                 .attr("cx", function (d) {
                     return d.x;
@@ -158,6 +176,9 @@ graph.modules.engin = (function () {
                 return "Node-" + d.name;
             });
 
+            /**
+             * Adding node's text
+             */
             nodeEnter.append("svg:text")
                 .text(function (d, i) {
                     return d.name;
@@ -208,6 +229,9 @@ graph.modules.engin = (function () {
                     })
             });
 
+            /**
+             * Update force
+             */
             force.gravity(0.1)
                 .charge(-1000)
                 .size([w, h])
@@ -236,12 +260,12 @@ graph.app.controller('ConfigController', function ($scope) {
 
 
     $scope.nextStep = function () {
-        if ($scope.nodes.length === 0 || $scope.links.length === 0) {
+        if (graph.nodes.length === 0 || graph.links.length === 0) {
             console.log('HERE??');
             alert('Please, add nodes or edges.');
         } else {
             console.log('INI DATASTRUCT');
-            graph.modules.datastruct.init($scope.nodes, $scope.links);
+            graph.modules.datastruct.init();
         }
     };
 
@@ -251,7 +275,7 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     $scope.addNode = function (nodeName) {
         //filter same node
-        var nf = $scope.nodes.filter(function (node) {
+        var nf = graph.nodes.filter(function (node) {
             return node.name === nodeName
         });
         if (nf.length == 0 && nodeName) { //node doesn't exist
@@ -259,7 +283,7 @@ graph.app.controller('ConfigController', function ($scope) {
             graph.nodes.push({
                 name: nodeName,
                 visited: false,
-                root: $scope.nodes.length === 0,
+                root: graph.nodes.length === 0,
                 neighbours: [],
                 disabled: {source: false, target: false}
             });
@@ -272,8 +296,8 @@ graph.app.controller('ConfigController', function ($scope) {
              neighbours: [],
              disabled: {source: false, target: false}
              });*/
-            if ($scope.nodes.length > 0)
-                previousRootNode = $scope.nodes[0];
+            if (graph.nodes.length > 0)
+                previousRootNode = graph.nodes[0];
             graph.modules.engin.repaint();
         } else {
             alert('Node already exists.\nPlease choose another node\'s name');
@@ -287,10 +311,11 @@ graph.app.controller('ConfigController', function ($scope) {
      * @param index, node's index to remove
      */
     $scope.removeNode = function (index) {
-        updateLinks($scope.nodes[index]);
+        updateLinks(graph.nodes[index]);
         graph.nodes.splice(index, 1);
-        if ($scope.nodes.length > 0 && index === 0)
-            $scope.nodes[0].root = true
+        if (graph.nodes.length > 0 && index === 0)
+            graph.nodes[0].root = true;
+        graph.modules.engin.repaint();
     };
 
     /**
@@ -303,6 +328,7 @@ graph.app.controller('ConfigController', function ($scope) {
             node.root = true
         }
         previousRootNode = node;
+        graph.modules.engin.repaint();
     };
 
     /**
@@ -316,10 +342,10 @@ graph.app.controller('ConfigController', function ($scope) {
         console.log(target);
         if (source !== -1 && target !== -1) {
             graph.links.push({
-                source: $scope.nodes[source],
-                target: $scope.nodes[target]
+                source: graph.nodes[source],
+                target: graph.nodes[target]
             });
-
+            graph.modules.engin.repaint();
             $scope.source = -1;
             $scope.target = -1;
             initializeDisableItem();
@@ -357,7 +383,7 @@ graph.app.controller('ConfigController', function ($scope) {
                     }
                     break;
             }
-            previousDisableLink = $scope.nodes[index];
+            previousDisableLink = graph.nodes[index];
         }
 
         /**
@@ -365,9 +391,9 @@ graph.app.controller('ConfigController', function ($scope) {
          * @param index, index node target selected
          */
         function filterSource(index) {
-            $scope.nodes[index].disabled.source = true;
-            $scope.links.forEach(function (l) {
-                if (l.source === $scope.nodes[index] || l.target === $scope.nodes[index]) {
+            graph.nodes[index].disabled.source = true;
+            graph.links.forEach(function (l) {
+                if (l.source === graph.nodes[index] || l.target === graph.nodes[index]) {
                     l.source.disabled.source = true;
                     l.target.disabled.source = true;
                 } else {
@@ -382,9 +408,9 @@ graph.app.controller('ConfigController', function ($scope) {
          * @param index, index node source selected
          */
         function filterTarget(index) {
-            $scope.nodes[index].disabled.target = true;
-            $scope.links.forEach(function (l) {
-                if (l.source === $scope.nodes[index] || l.target === $scope.nodes[index]) {
+            graph.nodes[index].disabled.target = true;
+            graph.links.forEach(function (l) {
+                if (l.source === graph.nodes[index] || l.target === graph.nodes[index]) {
                     l.source.disabled.target = true;
                     l.target.disabled.target = true;
                 } else {
@@ -401,21 +427,22 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     function updateLinks(node) {
         console.log('updateLinks...');
-        console.log($scope.links.length);
+        console.log(graph.links.length);
 
-        var tmp = $scope.links.filter(function (l) {
+        var tmp = graph.links.filter(function (l) {
             return l.source.name !== node.name && l.target.name !== node.name
         });
         console.log('TMP :: ' + tmp.length);
-        $scope.links = tmp;
-        console.log($scope.links.length);
+        graph.links = tmp;
+        console.log(graph.links.length);
+        graph.modules.engin.repaint();
     }
 
     /**
      * Enable each choices for textBox
      */
     function initializeDisableItem() {
-        $scope.nodes.forEach(function (n) {
+        graph.nodes.forEach(function (n) {
             n.disabled.source = false;
             n.disabled.target = false;
         })
