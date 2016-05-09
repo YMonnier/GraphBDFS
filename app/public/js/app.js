@@ -35,7 +35,7 @@ graph.modules.datastruct = (function () {
 })();
 
 graph.modules.engin = (function () {
-    var w, h, circleWidth, svgApp, force, link, node;
+    var w, h, circleWidth, svgApp, force;
     var palette = {
         "white": "#FFFFFF",
         "gray": "#708284",
@@ -68,12 +68,8 @@ graph.modules.engin = (function () {
             //nodes.push({})
             graph.modules.engin.repaint();
         },
-        repaint: function(){
+        repaint: function () {
             console.log('update');
-            //var nodes = force.nodes(),
-              //  links = force.links(),
-
-            //link = link.data(graph.links);
 
             var nodes = force.nodes();
             var links = force.links();
@@ -83,23 +79,25 @@ graph.modules.engin = (function () {
             console.log(graph.nodes);
             console.log(graph.links);
 
-            link = svgApp.selectAll(".link")
+            var link = svgApp.selectAll(".link")
                 .data(links);
 
-            link.enter().append("line")
+            var linkEnter = link.enter().append("line")
                 .attr("class", "link")
                 .attr("stroke", palette.gray)
                 .attr("fill", "none");
             link.exit().remove();
 
 
-            node = svgApp.selectAll("g.node")
-                .data(nodes);
-            node.enter().append("g")
+            var node = svgApp.selectAll("g.node")
+                .data(nodes, function (d) {
+                    return d.name;
+                });
+            var nodeEnter = node.enter().append("g")
                 .attr("class", "node")
                 .on("mouseover", function (d, i) {
                     if (!d.root) {
-                        d3.select(this)//.selectAll("circle")
+                        d3.select(this).select("circle")
                             .transition()
                             .duration(250)
                             .style("cursor", "none")
@@ -115,7 +113,7 @@ graph.modules.engin = (function () {
                             .attr("x", 15)
                             .attr("y", 5)
                     } else {
-                        d3.select(this).selectAll("circle")
+                        d3.select(this).select("circle")
                             .style("cursor", "none");
 
                         d3.select(this).select("text")
@@ -125,7 +123,7 @@ graph.modules.engin = (function () {
                 .on("mouseout", function (d, i) {
                     if (!d.root) {
                         //CIRCLE
-                        d3.select(this)//.selectAll("circle")
+                        d3.select(this).select("circle")
                             .transition()
                             .duration(250)
                             .attr("r", circleWidth)
@@ -142,7 +140,7 @@ graph.modules.engin = (function () {
                 })
                 .call(force.drag);
 
-            node.append("svg:circle")
+            nodeEnter.append("svg:circle")
                 .attr("cx", function (d) {
                     return d.x;
                 })
@@ -156,9 +154,11 @@ graph.modules.engin = (function () {
                     } else {
                         return palette.red
                     }
-                });
+                }).attr("id", function (d) {
+                return "Node-" + d.name;
+            });
 
-            node.append("text")
+            nodeEnter.append("svg:text")
                 .text(function (d, i) {
                     return d.name;
                 })
@@ -263,13 +263,15 @@ graph.app.controller('ConfigController', function ($scope) {
                 neighbours: [],
                 disabled: {source: false, target: false}
             });
+            $scope.source = -1;
+            $scope.target = -1;
             /*$scope.nodes.push({
-                name: nodeName,
-                visited: false,
-                root: $scope.nodes.length === 0,
-                neighbours: [],
-                disabled: {source: false, target: false}
-            });*/
+             name: nodeName,
+             visited: false,
+             root: $scope.nodes.length === 0,
+             neighbours: [],
+             disabled: {source: false, target: false}
+             });*/
             if ($scope.nodes.length > 0)
                 previousRootNode = $scope.nodes[0];
             graph.modules.engin.repaint();
@@ -286,7 +288,7 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     $scope.removeNode = function (index) {
         updateLinks($scope.nodes[index]);
-        $scope.nodes.splice(index, 1);
+        graph.nodes.splice(index, 1);
         if ($scope.nodes.length > 0 && index === 0)
             $scope.nodes[0].root = true
     };
@@ -313,10 +315,11 @@ graph.app.controller('ConfigController', function ($scope) {
         console.log(source);
         console.log(target);
         if (source !== -1 && target !== -1) {
-            $scope.links.push({
+            graph.links.push({
                 source: $scope.nodes[source],
                 target: $scope.nodes[target]
             });
+
             $scope.source = -1;
             $scope.target = -1;
             initializeDisableItem();
