@@ -93,6 +93,8 @@ graph.modules.engin = (function () {
             var link = svgApp.selectAll("line.link")
                 .data(links);
             var linkEnter = link.enter().append("line")
+                .style("position", "absolute")
+                .style("z-index", "1")
                 .attr("class", "link")
                 .attr("stroke", palette.gray)
                 .attr("fill", "none");
@@ -101,9 +103,21 @@ graph.modules.engin = (function () {
 
             var node = svgApp.selectAll("g.node")
                 .data(nodes, function (d) {
+
                     return d.name;
                 });
 
+            //Update existed node
+            node.select('circle').attr("fill", function (d, i) {
+                console.log('EZFEZFEZGRTGERTERG');
+                console.log(d);
+                if (!d.root) {
+
+                    return palette.blue;
+                } else {
+                    return palette.red
+                }
+            });
             /**
              * Adding node, catch event mouseover and mouseout
              */
@@ -188,7 +202,7 @@ graph.modules.engin = (function () {
                 })
                 .attr("y", function (d, i) {
                     if (!d.root) {
-                        return circleWidth - 2
+                        return circleWidth
                     } else {
                         return circleWidth + 5
                     }
@@ -207,7 +221,6 @@ graph.modules.engin = (function () {
                         return "end"
                     }
                 });
-
             node.exit().remove();
 
             force.on("tick", function (e) {
@@ -260,13 +273,16 @@ graph.app.controller('ConfigController', function ($scope) {
 
 
     $scope.nextStep = function () {
+        console.log('Next Step...');
+        /*
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             console.log('HERE??');
             alert('Please, add nodes or edges.');
         } else {
             console.log('INI DATASTRUCT');
             graph.modules.datastruct.init();
-        }
+        }*/
+        graph.modules.engin.repaint();
     };
 
     /**
@@ -289,13 +305,6 @@ graph.app.controller('ConfigController', function ($scope) {
             });
             $scope.source = -1;
             $scope.target = -1;
-            /*$scope.nodes.push({
-             name: nodeName,
-             visited: false,
-             root: $scope.nodes.length === 0,
-             neighbours: [],
-             disabled: {source: false, target: false}
-             });*/
             if (graph.nodes.length > 0)
                 previousRootNode = graph.nodes[0];
             graph.modules.engin.repaint();
