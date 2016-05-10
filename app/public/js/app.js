@@ -275,13 +275,13 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.nextStep = function () {
         console.log('Next Step...');
         /*
-        if (graph.nodes.length === 0 || graph.links.length === 0) {
-            console.log('HERE??');
-            alert('Please, add nodes or edges.');
-        } else {
-            console.log('INI DATASTRUCT');
-            graph.modules.datastruct.init();
-        }*/
+         if (graph.nodes.length === 0 || graph.links.length === 0) {
+         console.log('HERE??');
+         alert('Please, add nodes or edges.');
+         } else {
+         console.log('INI DATASTRUCT');
+         graph.modules.datastruct.init();
+         }*/
         graph.modules.engin.repaint();
     };
 
@@ -291,27 +291,31 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     $scope.addNode = function (nodeName) {
         //filter same node
+        if (!nodeName) {
+            alert('Please, node\' must not be blank');
+            return;
+        }
         var nf = graph.nodes.filter(function (node) {
             return node.name === nodeName
         });
-        if (nf.length == 0 && nodeName) { //node doesn't exist
-            console.log('ADD');
-            graph.nodes.push({
-                name: nodeName,
-                visited: false,
-                root: graph.nodes.length === 0,
-                neighbours: [],
-                disabled: {source: false, target: false}
-            });
-            $scope.source = -1;
-            $scope.target = -1;
-            if (graph.nodes.length > 0)
-                previousRootNode = graph.nodes[0];
-            graph.modules.engin.repaint();
-        } else {
+        if (nf.length !== 0) {
             alert('Node already exists.\nPlease choose another node\'s name');
+            return;
         }
 
+        console.log('ADD');
+        graph.nodes.push({
+            name: nodeName,
+            visited: false,
+            root: graph.nodes.length === 0,
+            neighbours: [],
+            disabled: {source: false, target: false}
+        });
+        $scope.source = -1;
+        $scope.target = -1;
+        if (graph.nodes.length > 0)
+            previousRootNode = graph.nodes[0];
+        graph.modules.engin.repaint();
         $scope.nodeName = '';
     };
 
@@ -327,18 +331,6 @@ graph.app.controller('ConfigController', function ($scope) {
         graph.modules.engin.repaint();
     };
 
-    /**
-     * Update all textBox, put false to previous selected node
-     * @param node, object node
-     */
-    $scope.rootChange = function (node) {
-        if (previousRootNode != node) {
-            previousRootNode.root = false;
-            node.root = true
-        }
-        previousRootNode = node;
-        graph.modules.engin.repaint();
-    };
 
     /**
      * Add a new link
@@ -346,9 +338,6 @@ graph.app.controller('ConfigController', function ($scope) {
      * @param target, targer node's index
      */
     $scope.addLink = function (source, target) {
-        console.log('addLink');
-        console.log(source);
-        console.log(target);
         if (source !== -1 && target !== -1) {
             graph.links.push({
                 source: graph.nodes[source],
@@ -360,6 +349,39 @@ graph.app.controller('ConfigController', function ($scope) {
             initializeDisableItem();
         } else
             alert('Please, select two nodes');
+    };
+
+
+    $scope.removeLink = function (index) {
+        graph.links.splice(index, 1);
+        graph.modules.engin.repaint();
+    };
+
+    /**
+     * Update links, remove links which depended on the node
+     * @param node, node dependence
+     */
+    function updateLinks(node) {
+        graph.links.forEach(function (l, index) {
+            console.log('index...... ' + index);
+            if ((l.source.name === node.name) || (l.target.name === node.name)) {
+                graph.links.splice(index, 1)
+            }
+        });
+    }
+
+
+    /**
+     * Update all textBox, put false to previous selected node
+     * @param node, object node
+     */
+    $scope.rootChange = function (node) {
+        if (previousRootNode != node) {
+            previousRootNode.root = false;
+            node.root = true
+        }
+        previousRootNode = node;
+        graph.modules.engin.repaint();
     };
 
     /**
@@ -430,22 +452,6 @@ graph.app.controller('ConfigController', function ($scope) {
         }
     };
 
-    /**
-     * Update links, remove links which depended on the node
-     * @param node, node dependence
-     */
-    function updateLinks(node) {
-        console.log('updateLinks...');
-        console.log(graph.links.length);
-
-        var tmp = graph.links.filter(function (l) {
-            return l.source.name !== node.name && l.target.name !== node.name
-        });
-        console.log('TMP :: ' + tmp.length);
-        graph.links = tmp;
-        console.log(graph.links.length);
-        graph.modules.engin.repaint();
-    }
 
     /**
      * Enable each choices for textBox
