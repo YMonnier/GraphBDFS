@@ -21,9 +21,12 @@ var graph = (function () {
  *  Create the datas structure
  *  Add Neighbours for each nodes
  */
-graph.modules.datastruct = (function () {
+graph.modules.algos = (function () {
     return {
         init: function () {
+            graph.nodes.forEach(function (node) {
+                node.neighbours = [];
+            });
             graph.nodes.forEach(function (node) {
                 graph.links.forEach(function (link) {
                     if (link.source === node) {
@@ -36,6 +39,12 @@ graph.modules.datastruct = (function () {
                 })
             });
             graph.modules.engin.repaint();
+        },
+        bfs: function () {
+
+        },
+        dfs: function () {
+
         }
     }
 })();
@@ -132,34 +141,29 @@ graph.modules.engin = (function () {
                             .attr("r", circleWidth + 3)
                             .attr("fill", palette.yellow);
 
-                        d3.select(this)//.select("text")
+                        d3.select(this)
                             .transition()
                             .style("cursor", "none")
                             .duration(250)
-                            .style("cursor", "none")
                             .attr("font-size", "1.5em")
                             .attr("x", 15)
                             .attr("y", 5)
                     } else {
                         d3.select(this).select("circle")
                             .style("cursor", "none");
-
                         d3.select(this).select("text")
                             .style("cursor", "none");
-
                     }
                 })
                 .on("mouseout", function (d, i) {
                     if (!d.root) {
-                        //CIRCLE
                         d3.select(this).select("circle")
                             .transition()
                             .duration(250)
                             .attr("r", circleWidth)
                             .attr("fill", palette.blue);
 
-                        //TEXT
-                        d3.select(this)//.select("text")
+                        d3.select(this)
                             .transition()
                             .duration(250)
                             .attr("font-size", "1em")
@@ -207,7 +211,7 @@ graph.modules.engin = (function () {
                         return circleWidth + 5
                     }
                 })
-                .attr("font-family", "Bree Serif")
+                .attr("font-family", "Avenir")
                 .attr("fill", function (d, i) {
                     return palette.white;
                 })
@@ -262,7 +266,7 @@ graph.modules.engin = (function () {
 /**
  * AngularJS
  * Configuration Controller
- * This controller allows to add, remove nodes or links.
+ * This controller allows to add, remove nodes or links and execute an algorithm.
  */
 graph.app.controller('ConfigController', function ($scope) {
     console.log('ConfigController INIT......');
@@ -272,17 +276,26 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.links = graph.links;
 
 
-    $scope.nextStep = function () {
-        console.log('Next Step...');
-        /*
-         if (graph.nodes.length === 0 || graph.links.length === 0) {
-         console.log('HERE??');
-         alert('Please, add nodes or edges.');
-         } else {
-         console.log('INI DATASTRUCT');
-         graph.modules.datastruct.init();
-         }*/
-        graph.modules.engin.repaint();
+    $scope.BFS = function () {
+        console.log('BFS...');
+        if (graph.nodes.length === 0 || graph.links.length === 0) {
+            alert('Please, add nodes or edges.');
+        } else {
+            $scope.dfsButton.disabled = true;
+            graph.modules.algos.bfs();
+        }
+        //graph.modules.engin.repaint();
+    };
+
+    $scope.DFS = function () {
+        console.log('BFS...');
+        if (graph.nodes.length === 0 || graph.links.length === 0) {
+            alert('Please, add nodes or edges.');
+        } else {
+            $scope.bfsButton.disabled = true;
+            graph.modules.algos.bfs();
+        }
+        //graph.modules.engin.repaint();
     };
 
     /**
@@ -351,7 +364,10 @@ graph.app.controller('ConfigController', function ($scope) {
             alert('Please, select two nodes');
     };
 
-
+    /**
+     * Remove node
+     * @param index, link's index to remove
+     */
     $scope.removeLink = function (index) {
         graph.links.splice(index, 1);
         graph.modules.engin.repaint();
