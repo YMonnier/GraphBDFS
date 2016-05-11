@@ -335,18 +335,21 @@ graph.app.controller('ConfigController', function ($scope) {
     $scope.links = graph.links;
 
 
+    /**
+     * Execute the Breadth First Algorithm on the current graph
+     */
     $scope.BFS = function () {
         console.log('BFS...');
-        graph.modules.algos.bfs();
-        return;
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
             graph.modules.algos.bfs();
         }
-        //graph.modules.engin.repaint();
     };
 
+    /**
+     * Execute the Depth First Algorithm on the current graph
+     */
     $scope.DFS = function () {
         console.log('DFS...');
         if (graph.nodes.length === 0 || graph.links.length === 0) {
@@ -354,9 +357,11 @@ graph.app.controller('ConfigController', function ($scope) {
         } else {
             graph.modules.algos.dfs({});
         }
-        //graph.modules.engin.repaint();
     };
 
+    /**
+     * Disable all
+     */
     $scope.refreshGraph = function () {
         graph.modules.algos.init();
     };
@@ -379,6 +384,7 @@ graph.app.controller('ConfigController', function ($scope) {
             return;
         }
 
+        //Add node
         graph.nodes.push({
             name: nodeName,
             visited: false,
@@ -386,10 +392,15 @@ graph.app.controller('ConfigController', function ($scope) {
             neighbours: [],
             disabled: {source: false, target: false}
         });
+
+        //Put index -1 to checkBox
         $scope.source = -1;
         $scope.target = -1;
+
+        //Update root node
         if (graph.nodes.length > 0)
             previousRootNode = graph.nodes[0];
+
         graph.modules.engin.repaint();
         $scope.nodeName = '';
     };
@@ -427,7 +438,7 @@ graph.app.controller('ConfigController', function ($scope) {
     };
 
     /**
-     * Remove node
+     * Remove link
      * @param index, link's index to remove
      */
     $scope.removeLink = function (index) {
@@ -450,7 +461,8 @@ graph.app.controller('ConfigController', function ($scope) {
 
 
     /**
-     * Update all textBox, put false to previous selected node
+     * Update all checkBox, put false to previous selected node
+     * and true to selected node
      * @param node, object node
      */
     $scope.rootChange = function (node) {
@@ -529,25 +541,40 @@ graph.app.controller('ConfigController', function ($scope) {
             });
         }
     };
-
+    /**
+     * Construct a random graph and display
+     * it on the canvas div
+     */
     $scope.randomGraph = function () {
+        var i;
         graph.nodes.splice(0,graph.nodes.length);
-        
+        graph.links.splice(0,graph.links.length);
+
         var name = [], g = 'A'.charCodeAt(0), j = 'Z'.charCodeAt(0);
         for (; g <= j; ++g) {
             name.push(String.fromCharCode(g));
         }
         var n = getRandomInt(6, 10);
-        var minEdges = n - 1;
-        var maxEdges = n * (n - 1)/2;
+        var minLinks = n - 1;
+        var maxLinks = (n * (n - 1)/2) - 2;
+        var l = getRandomInt(minLinks, maxLinks);
 
         console.log('Node\'s number :: ' + n);
-        for(var i=0;i<n;i++){
-            console.log('add');
+        console.log('Link\'s number :: ' + l);
+        $scope.addNode(name[0]);
+
+        for(i=1;i<n;i++){
+            console.log('add :: ' + name[i]);
             $scope.addNode(name[i]);
+
+            $scope.addLink(graph.nodes.length-1, getRandomInt(0, graph.nodes.length - 2))
         }
+
         console.log('NODES :: ' + graph.nodes.length);
 
+        for(i=0;i<n;i++){
+            //$scope.
+        }
     };
 
 
@@ -561,6 +588,12 @@ graph.app.controller('ConfigController', function ($scope) {
         })
     }
 
+    /**
+     * Random int
+     * @param min, min of random range
+     * @param max, maximum of random range
+     * @returns random interger
+     */
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
