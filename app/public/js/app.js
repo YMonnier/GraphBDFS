@@ -3,7 +3,6 @@
  * Graph and Network Theory Project - University of Lodz - Poland
  */
 
-
 /**
  * Global variable, module pattern
  * @type {{app, modules, nodes, links}}
@@ -22,9 +21,14 @@ var graph = (function () {
  *  Add Neighbours for each nodes
  */
 graph.modules.algos = (function () {
+    var execStep = [];
+    var queue = [];
+    var stack = [];
     return {
         init: function () {
-            graph.nodes.forEach(function (node) {
+            execStep = [];
+            graph.nodes.map(function (n) {
+                n.visited = false;
                 node.neighbours = [];
             });
             graph.nodes.forEach(function (node) {
@@ -41,10 +45,64 @@ graph.modules.algos = (function () {
             graph.modules.engin.repaint();
         },
         bfs: function () {
+            //TEST....
+            graph.modules.algos.init();
+            var indexRoot = graph.modules.algos.findRootNode();
+
+            var rootNode = graph.nodes[indexRoot];
+            rootNode.visited = true;
+
+            queue.push(rootNode);
+            execStep.push([indexRoot]);
+
+            while (queue.length != 0) {
+                var n = queue.shift();
+                var tmp = [];
+                n.neighbours.forEach(function (neighbour) {
+                    if (!neighbour.visited) {
+                        neighbour.visited = true;
+                        var i = graph.modules.algos.findIndexNode(neighbour);
+                        tmp.push(i);
+                        queue.push(neighbour);
+                    }
+                });
+                if (tmp.length !== 0)
+                    execStep.push(tmp);
+            }
+            graph.nodes.map(function (n) {
+                n.visited = false
+            });
+            console.log(execStep);
+            console.log(execStep.length);
+            graph.modules.algos.next(0);
+        },
+        dfs: function (node) {
+            graph.modules.algos.init();
+            var indexRoot = graph.modules.algos.findRootNode();
+
 
         },
-        dfs: function () {
-
+        findRootNode: function () {
+            console.log('FINDROOTNODE...');
+            return graph.nodes.findIndex(function (node) {
+                return node.root;
+            });
+        },
+        findIndexNode: function (node) {
+            return graph.nodes.indexOf(node);
+        },
+        next: function (step) {
+            console.log('NExt Function ... INDEX :: ' + step);
+            if (step < execStep.length) {
+                setTimeout(function () {
+                    execStep[step].forEach(function (i) {
+                        graph.nodes[i].visited = true;
+                    });
+                    graph.modules.engin.repaint();
+                    step += 1;
+                    graph.modules.algos.next(step);
+                }, 2000);
+            }
         }
     }
 })();
@@ -61,7 +119,8 @@ graph.modules.engin = (function () {
         "gray": "#708284",
         "yellow": "#FFCB10",
         "red": "#D11C24",
-        "blue": "#2176C7"
+        "blue": "#2176C7",
+        "blueh": "#1b4c8c"
     };
     return {
         init: function () {
@@ -87,17 +146,11 @@ graph.modules.engin = (function () {
             graph.modules.engin.repaint();
         },
         repaint: function () {
-            console.log('update');
+            console.log('Repaint::');
 
             //Get data
             var nodes = force.nodes();
             var links = force.links();
-
-            console.log('BEFORE REPAINT');
-            console.log(nodes);
-            console.log(links);
-            console.log(graph.nodes);
-            console.log(graph.links);
 
             var link = svgApp.selectAll("line.link")
                 .data(links);
@@ -112,20 +165,17 @@ graph.modules.engin = (function () {
 
             var node = svgApp.selectAll("g.node")
                 .data(nodes, function (d) {
-
                     return d.name;
                 });
 
             //Update existed node
             node.select('circle').attr("fill", function (d, i) {
-                console.log('EZFEZFEZGRTGERTERG');
-                console.log(d);
-                if (!d.root) {
-
+                if (d.visited)
+                    return palette.yellow;
+                if (!d.root)
                     return palette.blue;
-                } else {
-                    return palette.red
-                }
+                else
+                    return palette.red;
             });
             /**
              * Adding node, catch event mouseover and mouseout
@@ -133,13 +183,14 @@ graph.modules.engin = (function () {
             var nodeEnter = node.enter().append("g")
                 .attr("class", "node")
                 .on("mouseover", function (d, i) {
+
                     if (!d.root) {
                         d3.select(this).select("circle")
                             .transition()
                             .duration(250)
                             .style("cursor", "none")
                             .attr("r", circleWidth + 3)
-                            .attr("fill", palette.yellow);
+                            .attr("fill", !d.visited ? palette.blueh : palette.yellow);
 
                         d3.select(this)
                             .transition()
@@ -161,7 +212,7 @@ graph.modules.engin = (function () {
                             .transition()
                             .duration(250)
                             .attr("r", circleWidth)
-                            .attr("fill", palette.blue);
+                            .attr("fill", !d.visited ? palette.blue : palette.yellow);
 
                         d3.select(this)
                             .transition()
@@ -185,11 +236,10 @@ graph.modules.engin = (function () {
                 })
                 .attr("r", circleWidth)
                 .attr("fill", function (d, i) {
-                    if (!d.root) {
+                    if (!d.root)
                         return palette.blue;
-                    } else {
-                        return palette.red
-                    }
+                    else
+                        return palette.red;
                 }).attr("id", function (d) {
                 return "Node-" + d.name;
             });
@@ -205,11 +255,10 @@ graph.modules.engin = (function () {
                     return circleWidth + 5;
                 })
                 .attr("y", function (d, i) {
-                    if (!d.root) {
-                        return circleWidth
-                    } else {
+                    if (!d.root)
+                        return circleWidth;
+                    else
                         return circleWidth + 5
-                    }
                 })
                 .attr("font-family", "Avenir")
                 .attr("fill", function (d, i) {
@@ -219,11 +268,10 @@ graph.modules.engin = (function () {
                     return "1em";
                 })
                 .attr("text-anchor", function (d, i) {
-                    if (!d.root) {
+                    if (!d.root)
                         return "beginning";
-                    } else {
-                        return "end"
-                    }
+                    else
+                        return "end";
                 });
             node.exit().remove();
 
@@ -253,12 +301,6 @@ graph.modules.engin = (function () {
                 .charge(-1000)
                 .size([w, h])
                 .start();
-
-            console.log('AFTER REPAINT');
-            console.log(nodes);
-            console.log(links);
-            console.log(graph.nodes);
-            console.log(graph.links);
         }
     }
 })();
@@ -278,10 +320,11 @@ graph.app.controller('ConfigController', function ($scope) {
 
     $scope.BFS = function () {
         console.log('BFS...');
+        graph.modules.algos.bfs();
+        return;
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
-            $scope.dfsButton.disabled = true;
             graph.modules.algos.bfs();
         }
         //graph.modules.engin.repaint();
@@ -292,10 +335,13 @@ graph.app.controller('ConfigController', function ($scope) {
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
-            $scope.bfsButton.disabled = true;
             graph.modules.algos.bfs();
         }
         //graph.modules.engin.repaint();
+    };
+
+    $scope.refreshGraph = function() {
+        
     };
 
     /**
@@ -316,7 +362,6 @@ graph.app.controller('ConfigController', function ($scope) {
             return;
         }
 
-        console.log('ADD');
         graph.nodes.push({
             name: nodeName,
             visited: false,
@@ -479,3 +524,31 @@ graph.app.controller('ConfigController', function ($scope) {
         })
     }
 });
+
+/**
+ * This method has been added to the ECMAScript 6 specification and
+ * may not be available in all JavaScript implementations yet
+ */
+
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function (predicate) {
+        if (this === null) {
+            throw new TypeError('Array.prototype.findIndex called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
