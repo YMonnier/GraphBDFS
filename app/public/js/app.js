@@ -531,12 +531,13 @@ graph.app.controller('ConfigController', function ($scope) {
     };
 
     $scope.randomGraph = function () {
-        graph.nodes = [];
+        graph.nodes.splice(0,graph.nodes.length);
+        
         var name = [], g = 'A'.charCodeAt(0), j = 'Z'.charCodeAt(0);
         for (; g <= j; ++g) {
             name.push(String.fromCharCode(g));
         }
-        var n = getRandomInt(7, 17);
+        var n = getRandomInt(6, 10);
         var minEdges = n - 1;
         var maxEdges = n * (n - 1)/2;
 
