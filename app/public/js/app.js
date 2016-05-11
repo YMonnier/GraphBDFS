@@ -23,6 +23,10 @@ var graph = (function () {
 graph.modules.algos = (function () {
     var execStep, queue, stack;
     return {
+        /**
+         * Initialize data structure
+         * Put for each node his neighbours
+         */
         init: function () {
             execStep = [];
             queue = [];
@@ -44,6 +48,9 @@ graph.modules.algos = (function () {
             });
             graph.modules.engin.repaint();
         },
+        /**
+         * Apply Breadth First Search Algorithm to the current graph.
+         */
         bfs: function () {
             graph.modules.algos.init();
             var indexRoot = graph.modules.algos.findRootNode(),
@@ -70,10 +77,12 @@ graph.modules.algos = (function () {
             graph.nodes.map(function (n) {
                 n.visited = false
             });
-            console.log(execStep);
-            console.log(execStep.length);
+
             graph.modules.algos.next(0);
         },
+        /**
+         * Apply Depth First Search Algorithm to the current graph.
+         */
         dfs: function () {
             graph.modules.algos.init();
             var indexRoot = graph.modules.algos.findRootNode(),
@@ -95,21 +104,30 @@ graph.modules.algos = (function () {
             graph.nodes.map(function (n) {
                 n.visited = false
             });
-            console.log(execStep);
-            console.log(execStep.length);
             graph.modules.algos.next(0);
         },
+        /**
+         * Find the source node (Root node)
+         * @return node
+         */
         findRootNode: function () {
-            console.log('FINDROOTNODE...');
             return graph.nodes.findIndex(function (node) {
                 return node.root;
             });
         },
+        /**
+         * Find node's index
+         * @param node
+         * @returns {number} node's index
+         */
         findIndexNode: function (node) {
             return graph.nodes.indexOf(node);
         },
+        /**
+         *  Execute step by step the selected algorithm.
+         * @param step, step's number
+         */
         next: function (step) {
-            console.log('NExt Function ... INDEX :: ' + step);
             if (step < execStep.length) {
                 setTimeout(function () {
                     execStep[step].forEach(function (i) {
@@ -118,7 +136,7 @@ graph.modules.algos = (function () {
                     graph.modules.engin.repaint();
                     step += 1;
                     graph.modules.algos.next(step);
-                }, 2000);
+                }, 1500);
             }
         }
     }
@@ -127,6 +145,7 @@ graph.modules.algos = (function () {
 /**
  * Module engin. initiliaze svg panel, repaint panel
  * Create nodes(handlers, text, circle, node) and links
+ * 3d.js library
  * @type {{init, repaint}}
  */
 graph.modules.engin = (function () {
@@ -141,7 +160,6 @@ graph.modules.engin = (function () {
     };
     return {
         init: function () {
-            console.log('graph.modules.engin.INIT......');
             h = $('#content').height();
             w = $('#content').width();
 
@@ -163,8 +181,6 @@ graph.modules.engin = (function () {
             graph.modules.engin.repaint();
         },
         repaint: function () {
-            console.log('Repaint::');
-
             //Get data
             var nodes = force.nodes();
             var links = force.links();
@@ -315,9 +331,9 @@ graph.modules.engin = (function () {
              * Update force
              */
             force.gravity(0.1)
-                .charge(-1000)
+                .charge(-500)
                 .size([w, h])
-                .distance(70)
+                .distance(100)
                 .start();
         }
     }
@@ -329,7 +345,6 @@ graph.modules.engin = (function () {
  * This controller allows to add, remove nodes or links and execute an algorithm.
  */
 graph.app.controller('ConfigController', function ($scope) {
-    console.log('ConfigController INIT......');
     graph.modules.engin.init();
     var previousRootNode = {};
     $scope.nodes = graph.nodes;
@@ -340,7 +355,6 @@ graph.app.controller('ConfigController', function ($scope) {
      * Execute the Breadth First Algorithm on the current graph
      */
     $scope.BFS = function () {
-        console.log('BFS...');
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
@@ -352,7 +366,6 @@ graph.app.controller('ConfigController', function ($scope) {
      * Execute the Depth First Algorithm on the current graph
      */
     $scope.DFS = function () {
-        console.log('DFS...');
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
@@ -361,7 +374,8 @@ graph.app.controller('ConfigController', function ($scope) {
     };
 
     /**
-     * Disable all
+     * Refresh graph, put unvisited for each node.
+     * Update GUI
      */
     $scope.refreshGraph = function () {
         graph.modules.algos.init();
@@ -453,7 +467,6 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     function updateLinks(node) {
         graph.links.forEach(function (l, index) {
-            console.log('index...... ' + index);
             if ((l.source.name === node.name) || (l.target.name === node.name)) {
                 graph.links.splice(index, 1)
             }
@@ -483,23 +496,19 @@ graph.app.controller('ConfigController', function ($scope) {
      */
     $scope.disabledChange = function (select, index) {
         if (index != -1) {
-
             if ($scope.source === $scope.target) {
                 initializeDisableItem();
                 $scope.source = -1;
                 $scope.target = -1;
                 return;
             }
-
             switch (select) {
                 case 'source':
-                    console.log('$scope.target : ' + $scope.target);
                     if ($scope.target === -1) {
                         filterTarget(index);
                     }
                     break;
                 case 'target':
-                    //$scope.source = -1;
                     if ($scope.source === -1) {
                         filterSource(index);
                     }
@@ -544,7 +553,7 @@ graph.app.controller('ConfigController', function ($scope) {
     };
     /**
      * Construct a random graph and display
-     * it on the canvas div
+     * it on the main canvas svg
      */
     $scope.randomGraph = function () {
         var i;
@@ -559,17 +568,13 @@ graph.app.controller('ConfigController', function ($scope) {
         var minLinks = n - 1;
         var maxLinks = (n * (n - 1)/2) - 2;
         var l = getRandomInt(minLinks, maxLinks) - minLinks;
-        console.log(maxLinks);
-        console.log(minLinks);
-        console.log(l);
-        $scope.addNode(name[0]);
 
+        $scope.addNode(name[0]);
         for(i=1;i<n;i++){
             $scope.addNode(name[i]);
             $scope.addLink(graph.nodes.length-1, getRandomInt(0, graph.nodes.length - 2))
         }
         graph.modules.algos.init();
-        console.log('NODES :: ' + graph.nodes.length);
 
         for(i=l;i>-0;i--){
             var s = getRandomInt(0, graph.nodes.length - 1);
@@ -609,8 +614,8 @@ graph.app.controller('ConfigController', function ($scope) {
 /**
  * This method has been added to the ECMAScript 6 specification and
  * may not be available in all JavaScript implementations yet
+ * Redifined if necessary.
  */
-
 if (!Array.prototype.findIndex) {
     Array.prototype.findIndex = function (predicate) {
         if (this === null) {
