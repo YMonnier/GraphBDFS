@@ -22,14 +22,16 @@ var graph = (function () {
  */
 graph.modules.algos = (function () {
     var execStep = [];
-    var queue = [];
-    var stack = [];
+    var queue;
+    var stack;
     return {
         init: function () {
             execStep = [];
+            queue = [];
+            stack = [];
             graph.nodes.map(function (n) {
                 n.visited = false;
-                node.neighbours = [];
+                n.neighbours = [];
             });
             graph.nodes.forEach(function (node) {
                 graph.links.forEach(function (link) {
@@ -76,11 +78,30 @@ graph.modules.algos = (function () {
             console.log(execStep.length);
             graph.modules.algos.next(0);
         },
-        dfs: function (node) {
+        dfs: function () {
             graph.modules.algos.init();
             var indexRoot = graph.modules.algos.findRootNode();
+            var rootNode = graph.nodes[indexRoot];
 
+            stack.push(rootNode);
 
+            while (stack.length != 0) {
+                var n = stack.pop();
+                if (!n.visited) {
+                    n.visited = true;
+                    var i = graph.modules.algos.findIndexNode(n);
+                    execStep.push([i]);
+                    n.neighbours.forEach(function (neighbour) {
+                        stack.push(neighbour);
+                    });
+                }
+            }
+            graph.nodes.map(function (n) {
+                n.visited = false
+            });
+            console.log(execStep);
+            console.log(execStep.length);
+            graph.modules.algos.next(0);
         },
         findRootNode: function () {
             console.log('FINDROOTNODE...');
@@ -331,17 +352,17 @@ graph.app.controller('ConfigController', function ($scope) {
     };
 
     $scope.DFS = function () {
-        console.log('BFS...');
+        console.log('DFS...');
         if (graph.nodes.length === 0 || graph.links.length === 0) {
             alert('Please, add nodes or edges.');
         } else {
-            graph.modules.algos.bfs();
+            graph.modules.algos.dfs({});
         }
         //graph.modules.engin.repaint();
     };
 
-    $scope.refreshGraph = function() {
-        
+    $scope.refreshGraph = function () {
+        graph.modules.algos.init();
     };
 
     /**
