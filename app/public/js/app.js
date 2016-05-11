@@ -317,6 +317,7 @@ graph.modules.engin = (function () {
             force.gravity(0.1)
                 .charge(-1000)
                 .size([w, h])
+                .distance(70)
                 .start();
         }
     }
@@ -557,23 +558,29 @@ graph.app.controller('ConfigController', function ($scope) {
         var n = getRandomInt(6, 10);
         var minLinks = n - 1;
         var maxLinks = (n * (n - 1)/2) - 2;
-        var l = getRandomInt(minLinks, maxLinks);
-
-        console.log('Node\'s number :: ' + n);
-        console.log('Link\'s number :: ' + l);
+        var l = getRandomInt(minLinks, maxLinks) - minLinks;
+        console.log(maxLinks);
+        console.log(minLinks);
+        console.log(l);
         $scope.addNode(name[0]);
 
         for(i=1;i<n;i++){
-            console.log('add :: ' + name[i]);
             $scope.addNode(name[i]);
-
             $scope.addLink(graph.nodes.length-1, getRandomInt(0, graph.nodes.length - 2))
         }
-
+        graph.modules.algos.init();
         console.log('NODES :: ' + graph.nodes.length);
 
-        for(i=0;i<n;i++){
-            //$scope.
+        for(i=l;i>-0;i--){
+            var s = getRandomInt(0, graph.nodes.length - 1);
+            var t = getRandomInt(0, graph.nodes.length - 1);
+            var source = graph.nodes[s];
+            var target = graph.nodes[t];
+            while (source.neighbours.includes(target)){
+                t = getRandomInt(0, graph.nodes.length - 1);
+                target = graph.nodes[t];
+            }
+            $scope.addLink(s, t)
         }
     };
 
