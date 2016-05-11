@@ -21,9 +21,7 @@ var graph = (function () {
  *  Add Neighbours for each nodes
  */
 graph.modules.algos = (function () {
-    var execStep = [];
-    var queue;
-    var stack;
+    var execStep, queue, stack;
     return {
         init: function () {
             execStep = [];
@@ -47,11 +45,9 @@ graph.modules.algos = (function () {
             graph.modules.engin.repaint();
         },
         bfs: function () {
-            //TEST....
             graph.modules.algos.init();
-            var indexRoot = graph.modules.algos.findRootNode();
-
-            var rootNode = graph.nodes[indexRoot];
+            var indexRoot = graph.modules.algos.findRootNode(),
+                rootNode = graph.nodes[indexRoot];
             rootNode.visited = true;
 
             queue.push(rootNode);
@@ -80,8 +76,8 @@ graph.modules.algos = (function () {
         },
         dfs: function () {
             graph.modules.algos.init();
-            var indexRoot = graph.modules.algos.findRootNode();
-            var rootNode = graph.nodes[indexRoot];
+            var indexRoot = graph.modules.algos.findRootNode(),
+                rootNode = graph.nodes[indexRoot];
 
             stack.push(rootNode);
 
@@ -534,6 +530,25 @@ graph.app.controller('ConfigController', function ($scope) {
         }
     };
 
+    $scope.randomGraph = function () {
+        graph.nodes = [];
+        var name = [], g = 'A'.charCodeAt(0), j = 'Z'.charCodeAt(0);
+        for (; g <= j; ++g) {
+            name.push(String.fromCharCode(g));
+        }
+        var n = getRandomInt(7, 17);
+        var minEdges = n - 1;
+        var maxEdges = n * (n - 1)/2;
+
+        console.log('Node\'s number :: ' + n);
+        for(var i=0;i<n;i++){
+            console.log('add');
+            $scope.addNode(name[i]);
+        }
+        console.log('NODES :: ' + graph.nodes.length);
+
+    };
+
 
     /**
      * Enable each choices for textBox
@@ -543,6 +558,10 @@ graph.app.controller('ConfigController', function ($scope) {
             n.disabled.source = false;
             n.disabled.target = false;
         })
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 });
 
