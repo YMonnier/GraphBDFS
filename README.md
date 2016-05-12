@@ -1,5 +1,6 @@
 # GraphBDFS
 Graph and Network Theory Project - University Of Lodz - Poland
+
 **GraphBDFS** is a program which allows to **create/view** an **Undirected Connected Graph**. You can create it **randomly** or **personnaly**. Then you can apply the **Breadth First Search** or **Depth First Search** Algorithms on the current Graph. This program was written in JavaScript with 3d.js.
 
 Algorithms
