@@ -37,7 +37,7 @@ Begin
 	          add n to S
 End        	    
 ```
-#### Code colors
+#### Color code
 
 - Blue: unvisited node
 - Red: root node
