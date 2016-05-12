@@ -37,6 +37,12 @@ Begin
 	          add n to S
 End        	    
 ```
+#### Code colors
+
+- Blue: unvisited node
+- Red: root node
+- Yellow: visited node
+
 #### Installation
   1. `git clone git@github.com:YMonnier/GraphBDFS.git`
   2. run index.html
