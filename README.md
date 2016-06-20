@@ -23,7 +23,7 @@ Begin
 	  For each n in neighbours(p) do
 	    If n is unvisited Then
 	      visitedMark(n)
-        add n to Q
+	      add n to Q
 End
 ```
 
