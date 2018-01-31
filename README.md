@@ -53,5 +53,5 @@ End
   2. run index.html
   3. enjoy!
   
-##Contributors
+## Contributors
 [@YMonnier](https://github.com/YMonnier)
